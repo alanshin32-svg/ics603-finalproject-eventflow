@@ -7,7 +7,9 @@ The full proposal is in docs/proposal.md.
 ## Layout
 
 - `app/main.py`: FastAPI routes and the page. No business rules here.
-- `app/agent.py`: the Pydantic AI agent and its output model.
+- `app/agent.py`: the Pydantic AI agent, extraction prompt, and model invocation.
+- `app/models.py`: shared request, response, and source-quote models.
+- `app/drafting.py`: extraction orchestration and deterministic missing-field merging.
 - `app/rules.py`: business rules in plain Python. No FastAPI, no LLM client.
 - This is the starting layout. When a module takes on a second responsibility,
   split it by responsibility (for example, `app/rules.py` into
