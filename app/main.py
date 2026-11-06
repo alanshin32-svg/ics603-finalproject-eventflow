@@ -1,11 +1,18 @@
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
-from app.agent import DraftRequest, DraftResponse, SourceQuotes
+from app.agent import ConfigurationError, ExtractionError, extract_draft
+from app.drafting import Extractor, draft_event
+from app.models import DraftRequest, DraftResponse
 
 app = FastAPI(title="EventFlow")
+
+
+def get_extractor() -> Extractor:
+    return extract_draft
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -14,24 +21,16 @@ def read_root() -> str:
 
 
 @app.post("/draft", response_model=DraftResponse)
-def create_draft(request: DraftRequest) -> DraftResponse:
-    return DraftResponse(
-        title="Example event (placeholder)",
-        description="This is a fixed example description, not extracted from your text.",
-        date="2026-12-01",
-        time="17:00",
-        location="Example room",
-        sig="",
-        kind="Other",
-        missing_fields=[],
-        uncertain_fields=[],
-        source_quotes=SourceQuotes(
-            title="Placeholder source quote",
-            description="Placeholder source quote",
-            date="Placeholder source quote",
-            time="Placeholder source quote",
-            location="Placeholder source quote",
-            sig="",
-            kind="Placeholder source quote",
-        ),
-    )
+async def create_draft(
+    request: DraftRequest, extractor: Annotated[Extractor, Depends(get_extractor)]
+) -> DraftResponse:
+    try:
+        return await draft_event(request, extractor=extractor)
+    except ConfigurationError:
+        raise HTTPException(
+            status_code=503, detail="Event extraction is not configured."
+        ) from None
+    except ExtractionError:
+        raise HTTPException(
+            status_code=502, detail="Could not create a draft. Please try again."
+        ) from None
