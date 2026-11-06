@@ -1,0 +1,32 @@
+# Instructions for coding agents
+
+EventFlow is a web app that helps ACM officers turn informal event announcements
+into reviewed event drafts matching the ACM website's event form.
+The full proposal is in docs/proposal.md.
+
+## Layout
+
+- `app/main.py`: FastAPI routes and the page. No business rules here.
+- `app/agent.py`: the Pydantic AI agent and its output model.
+- `app/rules.py`: business rules in plain Python. No FastAPI, no LLM client.
+
+## Commands
+
+```bash
+uv run fastapi dev app/main.py   # run the app
+uv run ruff check                # lint, including the complexity limit
+uv run mypy                      # check types
+uv run pytest                    # run the tests
+```
+
+## Rules
+
+- Tests never call a real model. Use `TestModel` with
+  `override_allow_model_requests(False)`.
+- Read `LLM_API_TOKEN` and `LLM_API_GATEWAY` from the environment. Never
+  write a key into a file other than `.env`.
+- Run `uv run ruff check`, `uv run mypy`, and `uv run pytest` after every
+  change, and include their output in your report. Do not report a change as
+  done while any of them fails.
+- Never weaken a check to make it pass: do not raise `max-complexity`, add a
+  `# noqa` or `# type: ignore` comment, or skip a test.
