@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EventFlow</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #243044; background: #f5f7fa; }
+    section { background: white; border: 1px solid #d4dbe5; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    label { display: block; margin: .75rem 0 .25rem; font-weight: 600; }
+    textarea { box-sizing: border-box; width: 100%; min-height: 130px; }
+    button, input, textarea { font: inherit; padding: .5rem; }
+    button { margin: .25rem 0; }
+    .field { border-bottom: 1px solid #e0e5eb; padding: .75rem 0; }
+    .field p { margin: .3rem 0; white-space: pre-wrap; }
+    .quote, .note { color: #536176; }
+  </style>
+</head>
+<body>
+  <h1>EventFlow</h1>
+  <p>Event intake assistant for ACM at UH Manoa.</p>
+  <p class="note">Skeleton preview: every submission returns the same example draft. Nothing is extracted, checked, or saved.</p>
+
+  <section aria-labelledby="announcement-heading">
+    <h2 id="announcement-heading">1. Announcement</h2>
+    <form id="announcement-form">
+      <label for="announcement">Announcement text</label>
+      <textarea id="announcement" name="announcement_text"></textarea>
+      <label for="posted-date">Posted date</label>
+      <input id="posted-date" name="posted_date" type="date">
+      <button type="button" disabled>Today (placeholder)</button>
+      <p><button id="submit-button" type="submit">Create draft</button></p>
+    </form>
+    <p id="status" role="status" aria-live="polite">Submit to see the placeholder draft.</p>
+  </section>
+
+  <section aria-labelledby="draft-heading">
+    <h2 id="draft-heading">2. Draft fields</h2>
+    <p class="note">Source quotes and copy controls appear with each field. Copying is not implemented.</p>
+    <div id="draft-fields">No draft displayed yet.</div>
+  </section>
+
+  <section aria-labelledby="checks-heading">
+    <h2 id="checks-heading">3. Checks and flags</h2>
+    <p class="note">Placeholder only; no checks have been performed.</p>
+    <p>Missing fields: <span id="missing-fields">Awaiting placeholder draft</span></p>
+    <p>Uncertain fields: <span id="uncertain-fields">Awaiting placeholder draft</span></p>
+    <p>Scheduling warnings: placeholder.</p>
+  </section>
+
+  <section aria-labelledby="similar-heading">
+    <h2 id="similar-heading">4. Similar past events</h2>
+    <p>Similar events will appear here. No events are retrieved in this skeleton.</p>
+  </section>
+
+  <section aria-labelledby="review-heading">
+    <h2 id="review-heading">5. Review</h2>
+    <p>Review controls are placeholders. Nothing is approved, edited, rejected, or saved.</p>
+    <button type="button" disabled>Approve</button>
+    <button type="button" disabled>Edit</button>
+    <button type="button" disabled>Reject</button>
+  </section>
+
+  <section aria-labelledby="saved-heading">
+    <h2 id="saved-heading">6. Saved events and search</h2>
+    <label for="search">Search past events</label>
+    <input id="search" type="search" placeholder="career events" disabled>
+    <button type="button" disabled>Search</button>
+    <p>Saved events will appear here.</p>
+    <button type="button" disabled>View original text</button>
+  </section>
+
+  <script>
+    const fields = [
+      ['title', 'Title'], ['description', 'Description'], ['date', 'Event date'],
+      ['time', 'Event time'], ['kind', 'Kind'], ['location', 'Location'], ['sig', 'SIG']
+    ];
+
+    function showDraft(draft) {
+      const container = document.getElementById('draft-fields');
+      container.replaceChildren();
+      for (const [key, label] of fields) {
+        const field = document.createElement('div');
+        field.className = 'field';
+        const heading = document.createElement('strong');
+        heading.textContent = label;
+        const value = document.createElement('p');
+        value.textContent = draft[key] || '(blank)';
+        const quote = document.createElement('p');
+        quote.className = 'quote';
+        quote.textContent = 'Source: ' + (draft.source_quotes[key] || '(blank)');
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.disabled = true;
+        copy.textContent = 'Copy (placeholder)';
+        field.append(heading, value, quote, copy);
+        container.append(field);
+      }
+      document.getElementById('missing-fields').textContent = JSON.stringify(draft.missing_fields);
+      document.getElementById('uncertain-fields').textContent = JSON.stringify(draft.uncertain_fields);
+    }
+
+    document.getElementById('announcement-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const status = document.getElementById('status');
+      const button = document.getElementById('submit-button');
+      button.disabled = true;
+      status.textContent = 'Loading placeholder draft…';
+      try {
+        const response = await fetch('/draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            announcement_text: document.getElementById('announcement').value,
+            posted_date: document.getElementById('posted-date').value
+          })
+        });
+        if (!response.ok) throw new Error('Request failed');
+        showDraft(await response.json());
+        status.textContent = 'Fixed placeholder draft displayed. Your announcement has not been processed or saved.';
+      } catch (error) {
+        status.textContent = 'Could not load the placeholder draft. Check that the server is running and try again.';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
