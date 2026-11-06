@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.exceptions import ModelAPIError, RunTimedOut, UnexpectedModelBehavior
 from pydantic_ai.models import Model
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
 from app.models import DraftRequest, DraftResponse, SourceQuotes
@@ -72,7 +72,7 @@ def build_gateway_model() -> Model:
         raise ConfigurationError("Event extraction is not configured.")
     token, gateway, model_name = settings
     provider = OpenAIProvider(api_key=token, base_url=gateway)
-    return OpenAIChatModel(model_name, provider=provider)
+    return OpenAIResponsesModel(model_name, provider=provider)
 
 
 async def extract_draft(request: DraftRequest) -> DraftResponse:

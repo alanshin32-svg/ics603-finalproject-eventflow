@@ -133,6 +133,9 @@ flags with the model's flags without duplicates. This identifies absence, not ca
 correctness. Other checks, saved examples, editing, copying, approval/rejection actions,
 persistence, and search remain later work toward the full-project features above.
 LLM role
+Initial extraction uses the course gateway's gpt-6.1-sol model, selected through
+LLM_MODEL, with Pydantic AI structured output over the Responses API. Model names
+remain configurable rather than hardcoded.
 For the full project, the model reads the announcement text, the posted date, the SIG list,
 the Kind list, and up to two
 past event descriptions as style examples. It returns title, date (ISO, YYYY-MM-DD), time (24-hour,
@@ -229,7 +232,6 @@ location not on the list is kept as written, compared by its normalized text, an
 • How many style examples help without hurting accuracy (one or two), and whether to take them
 from the same kind or from the same SIG.
 Technical details I will learn later
-• Which model and structured-output method to use through the course gateway.
 • How semantic search will work (including for choosing style examples) and how to deploy the app.
 • Whether the ACM site has an API (ask whoever maintains it), and whether the gateway model
 accepts images for a later flyer feature.

@@ -23,7 +23,9 @@ LLM_MODEL=
 
 `LLM_API_TOKEN` is the course gateway token, `LLM_API_GATEWAY` is its OpenAI
 compatible base URL, and `LLM_MODEL` is the model identifier confirmed by the
-course gateway. No model name is assumed. Settings are loaded only when
+course gateway. Extraction uses the Responses API for structured-output tool
+calls, as required by models such as `gpt-6.1-sol`. No model name is hardcoded.
+Settings are loaded only when
 extraction is requested, so the page and simulated tests work without them.
 
 Run the project checks:
@@ -39,8 +41,9 @@ Tests prohibit real model requests and use simulated model output. They verify
 validation, the route-to-agent-to-rule flow, typed output, and safe errors. The
 Node smoke check executes the page script with minimal DOM/fetch stand-ins;
 it is not browser verification. These checks do not establish
-real extraction accuracy. The course model name is still unknown, so a live
-gateway smoke test and actual structured-output compatibility remain unverified.
+real extraction accuracy. A live course-gateway smoke test with `gpt-6.1-sol`
+and the Responses API returned the expected fields for one synthetic workshop
+announcement. Broader extraction-quality evaluation remains to be done.
 Every real draft requires human review, especially proposed relative dates.
 
 Blank announcements or missing/invalid posted dates return 422 before

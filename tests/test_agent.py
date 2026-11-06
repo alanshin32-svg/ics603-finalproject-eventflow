@@ -16,7 +16,7 @@ from pydantic_ai.messages import (
     UserPromptPart,
 )
 from pydantic_ai.models.function import AgentInfo, FunctionModel
-from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.models.test import TestModel
 
 from app import agent
@@ -111,7 +111,7 @@ def gateway_settings(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_builds_configured_gateway_model(gateway_settings: None) -> None:
     model = agent.build_gateway_model()
 
-    assert isinstance(model, OpenAIChatModel)
+    assert isinstance(model, OpenAIResponsesModel)
     assert model.model_name == "course-model-for-tests"
     assert str(model.client.base_url).rstrip("/") == "https://example.invalid/v1"
     assert model.client.api_key == "sentinel-test-secret"
