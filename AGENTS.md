@@ -55,3 +55,4 @@ uv run pytest                    # run the tests
   checklist (checked items were run; unchecked items are left for the reviewer).
 - After pushing, run `gh pr checks --watch` and report the result.
 - Never merge a pull request. The person merges after reviewing it.
+- Every pull request description includes a Mermaid diagram of the change.
