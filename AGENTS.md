@@ -57,3 +57,19 @@ uv run pytest                    # run the tests
   checklist (checked items were run; unchecked items are left for the reviewer).
 - After pushing, run `gh pr checks --watch` and report the result.
 - Never merge a pull request. The person merges after reviewing it.
+
+## Spec
+
+- `docs/proposal.md` is the spec. When a decision
+is made in a conversation (a feature added or
+left out, a limit or value chosen, an open
+question answered), edit the section the
+decision belongs to so that it states the
+decision, in the same change, and name that
+section in the pull request Summary. Change
+only what the decision affects. Do not add a
+dated log, approval history, or status notes;
+git and `docs/superpowers/` keep the history.- A design under `docs/superpowers/specs/` covers
+one change; `docs/proposal.md` covers the whole
+project. If the two disagree, ask before
+building.
