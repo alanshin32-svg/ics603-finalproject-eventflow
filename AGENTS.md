@@ -7,7 +7,9 @@ The full proposal is in docs/proposal.md.
 ## Layout
 
 - `app/main.py`: FastAPI routes and the page. No business rules here.
-- `app/agent.py`: the Pydantic AI agent and its output model.
+- `app/agent.py`: the Pydantic AI agent, extraction prompt, and model invocation.
+- `app/models.py`: shared request, response, and source-quote models.
+- `app/drafting.py`: extraction orchestration and deterministic missing-field merging.
 - `app/rules.py`: business rules in plain Python. No FastAPI, no LLM client.
 - This is the starting layout. When a module takes on a second responsibility,
   split it by responsibility (for example, `app/rules.py` into
@@ -55,3 +57,19 @@ uv run pytest                    # run the tests
   checklist (checked items were run; unchecked items are left for the reviewer).
 - After pushing, run `gh pr checks --watch` and report the result.
 - Never merge a pull request. The person merges after reviewing it.
+
+## Spec
+
+- `docs/proposal.md` is the spec. When a decision
+is made in a conversation (a feature added or
+left out, a limit or value chosen, an open
+question answered), edit the section the
+decision belongs to so that it states the
+decision, in the same change, and name that
+section in the pull request Summary. Change
+only what the decision affects. Do not add a
+dated log, approval history, or status notes;
+git and `docs/superpowers/` keep the history.- A design under `docs/superpowers/specs/` covers
+one change; `docs/proposal.md` covers the whole
+project. If the two disagree, ask before
+building.

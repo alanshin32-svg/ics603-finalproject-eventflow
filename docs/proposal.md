@@ -126,14 +126,30 @@ matched against the known rooms list), so “POST318” and “POST 318” count
 3 Review, save, and search: the officer approves, edits, or rejects; approved drafts are saved with
 their announcement and shown in the ACM form's field order with copy buttons; past events can
 be searched by meaning.
+The initial extraction slice drafts these fields with source quotes and missing/uncertain
+field lists. Descriptions use plain factual wording without saved examples. The existing
+Python rule reports missing date and time after trimming whitespace and merges these
+flags with the model's flags without duplicates. This identifies absence, not calendar
+correctness. Other checks, saved examples, editing, copying, approval/rejection actions,
+persistence, and search remain later work toward the full-project features above.
 LLM role
-The model reads the announcement text, the posted date, the SIG list, the Kind list, and up to two
+Initial extraction uses the course gateway's gpt-6.1-sol model, selected through
+LLM_MODEL, with Pydantic AI structured output over the Responses API. Model names
+remain configurable rather than hardcoded.
+For the full project, the model reads the announcement text, the posted date, the SIG list,
+the Kind list, and up to two
 past event descriptions as style examples. It returns title, date (ISO, YYYY-MM-DD), time (24-hour,
 HH:MM), location, description (1 to 3 sentences, including the end time if one is mentioned), sig (a
 name from the list, or empty), kind (one value from the list), a list of missing fields, a list of uncertain
 fields, and a source quote for each field. It must not invent values: anything absent from the text is left
 empty and flagged. The slug is not written by the model since it already is written by the ACM
 website.
+The initial extraction slice uses the announcement, posted date, and this proposal's Kind
+and SIG lists as prompt reference data; it does not load reference tables or saved
+descriptions. It produces a plain factual description using only the new announcement.
+Relative dates are proposed using the posted date and flagged for human confirmation.
+A retrospective message with no upcoming event leaves event fields and quotes empty
+rather than inventing an event. The Python date/time absence check runs after extraction.
 Style examples for the description. Limiting the description to facts in the text can make it flat, so
 the prompt includes one or two past saved descriptions as examples of ACM's tone, length, and
 phrasing. In version one these are the most recent saved events of the same kind (or the most recent
@@ -172,6 +188,11 @@ Every drafted field is shown with its source quote. The officer approves, edits,
 anything is saved. Relative dates (“this Thursday”), uncertain kinds, and same-day location warnings
 always need confirmation. The original text stays visible. In version one the officer copies the
 approved fields into the ACM site's form themselves.
+In the initial extraction slice, the officer inspects the returned fields, quotes, and
+missing/uncertain flags alongside the original text. The entered announcement and posted
+date stay visible after success or failure. Editing, copying, approval/rejection actions,
+and saving are later work; this slice creates no saved event. Every result still needs
+human review, including proposed relative dates and uncertain kinds.
 Same-day location warning. The warning compares normalized location and date, and shows the
 existing event's title and start time so the officer can see at a glance whether it is a real overlap or just
 two events in the same room at different times. It is a warning, not a block, so a false alarm costs one
@@ -211,7 +232,6 @@ location not on the list is kept as written, compared by its normalized text, an
 • How many style examples help without hurting accuracy (one or two), and whether to take them
 from the same kind or from the same SIG.
 Technical details I will learn later
-• Which model and structured-output method to use through the course gateway.
 • How semantic search will work (including for choosing style examples) and how to deploy the app.
 • Whether the ACM site has an API (ask whoever maintains it), and whether the gateway model
 accepts images for a later flyer feature.

@@ -19,7 +19,7 @@
 <body>
   <h1>EventFlow</h1>
   <p>Event intake assistant for ACM at UH Manoa.</p>
-  <p class="note">Skeleton preview: every submission returns the same example draft. Nothing is extracted, checked, or saved.</p>
+  <p class="note">Create a draft from your announcement, then review every field against its source quote. Nothing is saved.</p>
 
   <section aria-labelledby="announcement-heading">
     <h2 id="announcement-heading">1. Announcement</h2>
@@ -28,10 +28,10 @@
       <textarea id="announcement" name="announcement_text"></textarea>
       <label for="posted-date">Posted date</label>
       <input id="posted-date" name="posted_date" type="date">
-      <button type="button" disabled>Today (placeholder)</button>
+      <button type="button" disabled>Today (not implemented)</button>
       <p><button id="submit-button" type="submit">Create draft</button></p>
     </form>
-    <p id="status" role="status" aria-live="polite">Submit to see the placeholder draft.</p>
+    <p id="status" role="status" aria-live="polite">Submit an announcement and its posted date to create a draft.</p>
   </section>
 
   <section aria-labelledby="draft-heading">
@@ -42,15 +42,15 @@
 
   <section aria-labelledby="checks-heading">
     <h2 id="checks-heading">3. Checks and flags</h2>
-    <p class="note">Placeholder only; no checks have been performed.</p>
-    <p>Missing fields: <span id="missing-fields">Awaiting placeholder draft</span></p>
-    <p>Uncertain fields: <span id="uncertain-fields">Awaiting placeholder draft</span></p>
-    <p>Scheduling warnings: placeholder.</p>
+    <p class="note">Missing date and time are checked in Python. Review all model flags and proposed relative dates.</p>
+    <p>Missing fields: <span id="missing-fields">Awaiting draft</span></p>
+    <p>Uncertain fields: <span id="uncertain-fields">Awaiting draft</span></p>
+    <p>Scheduling warnings are not implemented.</p>
   </section>
 
   <section aria-labelledby="similar-heading">
     <h2 id="similar-heading">4. Similar past events</h2>
-    <p>Similar events will appear here. No events are retrieved in this skeleton.</p>
+    <p>Similar events are not implemented. No events are retrieved.</p>
   </section>
 
   <section aria-labelledby="review-heading">
@@ -92,7 +92,7 @@
         const copy = document.createElement('button');
         copy.type = 'button';
         copy.disabled = true;
-        copy.textContent = 'Copy (placeholder)';
+        copy.textContent = 'Copy (not implemented)';
         field.append(heading, value, quote, copy);
         container.append(field);
       }
@@ -105,7 +105,10 @@
       const status = document.getElementById('status');
       const button = document.getElementById('submit-button');
       button.disabled = true;
-      status.textContent = 'Loading placeholder draft…';
+      status.textContent = 'Creating draft...';
+      document.getElementById('draft-fields').textContent = 'Awaiting new draft.';
+      document.getElementById('missing-fields').textContent = 'Awaiting draft';
+      document.getElementById('uncertain-fields').textContent = 'Awaiting draft';
       try {
         const response = await fetch('/draft', {
           method: 'POST',
@@ -115,11 +118,19 @@
             posted_date: document.getElementById('posted-date').value
           })
         });
-        if (!response.ok) throw new Error('Request failed');
+        if (!response.ok) {
+          const messages = {
+            422: 'Enter announcement text and a valid posted date, then try again.',
+            503: 'Event extraction is not configured. Contact the app maintainer.',
+            502: 'Could not create a draft. Please try again.'
+          };
+          status.textContent = messages[response.status] || 'Could not create a draft. Please try again.';
+          return;
+        }
         showDraft(await response.json());
-        status.textContent = 'Fixed placeholder draft displayed. Your announcement has not been processed or saved.';
+        status.textContent = 'Draft ready. Review every field and source quote. Nothing has been saved.';
       } catch (error) {
-        status.textContent = 'Could not load the placeholder draft. Check that the server is running and try again.';
+        status.textContent = 'Could not create a draft. Check your connection and that the server is running, then try again.';
       } finally {
         button.disabled = false;
       }
